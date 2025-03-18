@@ -39,6 +39,7 @@ public class HttpUtil {
   public static final int PAGE_TIMEOUT = 7_000;
   //3 seconds
   public static final int CONNECTION_TIMEOUT = 3_000;
+  private static final String ALLOWED_URL_PREFIX = "https://";
 
   private static HttpClientManager httpClientManager = HttpClientManager.getInstance();
   private static HttpClientManager.HttpClientBuilderFacade clientBuilder = httpClientManager.createBuilder();
@@ -140,12 +141,16 @@ public class HttpUtil {
   public static InputStream getURLInputStream( final String uri ) {
 
     try {
-      URL url = new URL( uri );
+      URL url = HttpUtil.isValidURL( new URL( uri ) );
+
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setConnectTimeout( CONNECTION_TIMEOUT );
+      connection.setReadTimeout( PAGE_TIMEOUT );
+      connection.setRequestProperty( "User-Agent", "SecureClient/1.0" );
       connection.connect();
       InputStream in = connection.getInputStream();
       return in;
-    } catch ( Exception e ) {
+    } catch( Exception e ) {
       // TODO: handle this error
       Logger
         .error(
@@ -155,6 +160,14 @@ public class HttpUtil {
       return null;
     }
 
+  }
+
+  private static URL isValidURL( URL url ) throws SecurityException {
+    if ( url == null || url.toString().startsWith( ALLOWED_URL_PREFIX ) ) {
+      return url;
+    } else {
+      throw new SecurityException( "URL is not allowed: " + url );
+    }
   }
 
   public static Reader getURLReader( final String uri ) {
