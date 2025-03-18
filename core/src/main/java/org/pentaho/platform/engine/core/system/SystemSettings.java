@@ -77,7 +77,7 @@ public class SystemSettings extends PentahoBase implements ISystemSettings {
     if ( doc == null ) {
       return defaultValue;
     }
-    Node node = doc.selectSingleNode( "//" + settingName ); //$NON-NLS-1$
+    Node node = doc.selectSingleNode( "//" + sanitize( settingName ) ); //$NON-NLS-1$
     if ( node == null ) {
       return defaultValue;
     }
@@ -97,7 +97,7 @@ public class SystemSettings extends PentahoBase implements ISystemSettings {
     if ( doc == null ) {
       return null;
     }
-    settings = doc.selectNodes( "//" + settingName ); //$NON-NLS-1$
+    settings = doc.selectNodes( "//" + sanitize( settingName ) ); //$NON-NLS-1$
     settingsDocumentMap.put( path + settingName, settings );
     return settings;
   }
@@ -219,5 +219,40 @@ public class SystemSettings extends PentahoBase implements ISystemSettings {
 
   public String getSystemCfgSourceName() {
     return getAbsolutePath( SystemSettings.PENTAHOSETTINGSFILENAME );
+  }
+
+  private String sanitize( String settingName ) {
+    if ( settingName == null ) {
+      return null;
+    }
+    return settingName.replace( "'", "&apos;" )
+            .replace( "\"", "&quot;" )
+            .replace( "<", "&lt;" )
+            .replace( ">", "&gt;" )
+            .replace( "[", "&lbrack;" )
+            .replace( "]", "&rbrack;" )
+            .replace( "{", "&lbrace;" )
+            .replace( "}", "&rbrace;" )
+            .replace( "(", "&lparen;" )
+            .replace( ")", "&rparen;" )
+            .replace( "#", "&num;" )
+            .replace( "%", "&percnt;" )
+            .replace( ";", "&semi;" )
+            .replace( ":", "&colon;" )
+            .replace( ",", "&comma;" )
+            .replace( ".", "&period;" )
+            .replace( "?", "&quest;" )
+            .replace( "/", "&sol;" )
+            .replace( "\\", "&bsol;" )
+            .replace( "|", "&vert;" )
+            .replace( "!", "&excl;" )
+            .replace( "@", "&commat;" )
+            .replace( "$", "&dollar;" )
+            .replace( "&", "&amp;" )
+            .replace( "*", "&ast;" )
+            .replace( "-", "&hyphen;" )
+            .replace( "+", "&plus;" )
+            .replace( "=", "&equals;" )
+            .replace( "~", "&tilde;" );
   }
 }
